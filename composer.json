@@ -1,0 +1,16 @@
+{
+    "name": "totoprayogo1916/ci4-rajaongkir",
+    "type": "php-class",
+    "require": {
+        "codeigniter4/framework": "^4.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "files": [
+            "src/Rajaongkir.php"
+        ]
+    },
+    "require-dev": {
+        "codeigniter/coding-standard": "^1.1"
+    }
+}
