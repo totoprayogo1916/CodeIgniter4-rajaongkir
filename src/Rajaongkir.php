@@ -292,7 +292,7 @@ class Rajaongkir
         $client->setHeader('key', $this->apiKey);
 
         $this->response = $client->request($type, $uri, [
-            'form_params' => $params,
+            'query' => $params,
         ]);
 
         $getBody = json_decode($this->response->getBody(), true);
