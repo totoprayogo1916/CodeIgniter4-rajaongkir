@@ -13,6 +13,9 @@
 
 namespace Totoprayogo;
 
+use CodeIgniter\Config\Services;
+use Exception;
+
 // ------------------------------------------------------------------------
 
 /**
@@ -26,8 +29,9 @@ class Rajaongkir
      * @var string
      */
     public const ACCOUNT_STARTER = 'starter';
-    public const ACCOUNT_BASIC   = 'basic';
-    public const ACCOUNT_PRO     = 'pro';
+
+    public const ACCOUNT_BASIC = 'basic';
+    public const ACCOUNT_PRO   = 'pro';
 
     /**
      * Rajaongkir::$accountType
@@ -182,7 +186,7 @@ class Rajaongkir
      * @param mixed|null $apiKey
      * @param mixed|null $accountType
      *
-     * @throws \InvalidArgumentException
+     * @throws Exception
      */
     public function __construct($apiKey = null, $accountType = null)
     {
@@ -232,7 +236,7 @@ class Rajaongkir
      *
      * @param string $accountType RajaOngkir Account Type, can be starter, basic or pro
      *
-     * @throws \InvalidArgumentException
+     * @throws Exception
      *
      * @return static
      */
@@ -243,7 +247,7 @@ class Rajaongkir
         if (in_array($accountType, $this->supportedAccountTypes, true)) {
             $this->accountType = $accountType;
         } else {
-            throw new \InvalidArgumentException('Rajaongkir: Invalid Account Type');
+            throw new Exception('Rajaongkir: Invalid Account Type');
         }
 
         return $this;
@@ -282,51 +286,32 @@ class Rajaongkir
                 break;
         }
 
-        $uri     = (new Uri($apiUrl))->withPath($path);
-        $request = new Curl\Request();
-        $request->setHeaders([
-            'key' => $this->apiKey,
+        $client = Services::curlrequest();
+        $uri    = $apiUrl . '/' . $path;
+
+        $client->setHeader('key', $this->apiKey);
+
+        $this->response = $client->request($type, $uri, [
+            'form_params' => $params,
         ]);
 
-        switch ($type) {
-            default:
-            case 'GET':
-                $this->response = $request->setUri($uri)->get($params);
-                break;
+        $getBody = json_decode($this->response->getBody(), true);
+        $body    = $getBody['rajaongkir'];
+        $status  = $body['status'];
 
-            case 'POST':
-                $request->addHeader('content-type', 'application/x-www-form-urlencoded');
-                $this->response = $request->setUri($uri)->post($params);
-                break;
-        }
-
-        // Try to get curl error
-        if (false !== ($error = $this->response->getError())) {
-            $this->addErrors($error->getArrayCopy());
-        } else {
-            $body = $this->response->getBody();
-
-            if ($body instanceof \DOMDocument) {
-                $this->errors[404] = 'Page Not Found!';
-            } else {
-                $body   = $body->rajaongkir;
-                $status = $body['status'];
-
-                if ($status['code'] === 200) {
-                    if (isset($body['results'])) {
-                        if (count($body['results']) === 1 && isset($body['results'][0])) {
-                            return $body['results'][0];
-                        }
-                        if (count($body['results'])) {
-                            return $body['results'];
-                        }
-                    } elseif (isset($body['result'])) {
-                        return $body['result'];
-                    }
-                } else {
-                    $this->errors[$status['code']] = $status['description'];
+        if ($status['code'] === 200) {
+            if (isset($body['results'])) {
+                if (count($body['results']) === 1 && isset($body['results'][0])) {
+                    return $body['results'][0];
                 }
+                if (count($body['results'])) {
+                    return $body['results'];
+                }
+            } elseif (isset($body['result'])) {
+                return $body['result'];
             }
+        } else {
+            $this->errors[$status['code']] = $status['description'];
         }
 
         return false;
@@ -624,16 +609,13 @@ class Rajaongkir
         if (is_array($metrics)) {
             if (
                 ! isset($metrics['weight'])
-                && isset($metrics['length'])
-                && isset($metrics['width'])
-                && isset($metrics['height'])
+                && isset($metrics['length'], $metrics['width'], $metrics['height'])
+
             ) {
                 $metrics['weight'] = (($metrics['length'] * $metrics['width'] * $metrics['height']) / 6000) * 1000;
             } elseif (
-                isset($metrics['weight'])
-                && isset($metrics['length'])
-                && isset($metrics['width'])
-                && isset($metrics['height'])
+                isset($metrics['weight'], $metrics['length'], $metrics['width'], $metrics['height'])
+
             ) {
                 $weight = (($metrics['length'] * $metrics['width'] * $metrics['height']) / 6000) * 1000;
 
@@ -665,9 +647,8 @@ class Rajaongkir
 
                 if (
                     ! isset($params['weight'])
-                    && isset($params['length'])
-                    && isset($params['width'])
-                    && isset($params['height'])
+                    && isset($params['length'], $params['width'], $params['height'])
+
                 ) {
                     $this->errors[304] = 'Unsupported Dimension. Tipe akun starter tidak mendukung pengecekan biaya kirim berdasarkan dimensi.';
 
@@ -697,9 +678,8 @@ class Rajaongkir
 
                 if (
                     ! isset($params['weight'])
-                    && isset($params['length'])
-                    && isset($params['width'])
-                    && isset($params['height'])
+                    && isset($params['length'], $params['width'], $params['height'])
+
                 ) {
                     $this->errors[304] = 'Unsupported Dimension. Tipe akun basic tidak mendukung pengecekan biaya kirim berdasarkan dimensi.';
 
