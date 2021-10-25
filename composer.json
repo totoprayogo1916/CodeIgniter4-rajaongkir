@@ -1,5 +1,5 @@
 {
-    "name": "totoprayogo1916/ci4-rajaongkir",
+    "name": "totoprayogo1916/codeigniter4-rajaongkir",
     "type": "php-class",
     "require": {
         "codeigniter4/framework": "^4.0"
