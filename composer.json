@@ -9,8 +9,5 @@
         "files": [
             "src/Rajaongkir.php"
         ]
-    },
-    "require-dev": {
-        "codeigniter/coding-standard": "^1.1"
     }
 }
