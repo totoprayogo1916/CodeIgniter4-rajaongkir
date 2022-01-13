@@ -1,10 +1,10 @@
 {
     "name": "totoprayogo1916/codeigniter4-rajaongkir",
+    "license": "MIT",
     "type": "php-class",
     "require": {
-        "codeigniter4/framework": "^4.0"
+        "codeigniter4/framework": "^4"
     },
-    "license": "MIT",
     "autoload": {
         "files": [
             "src/Rajaongkir.php"
