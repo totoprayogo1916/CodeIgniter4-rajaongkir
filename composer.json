@@ -5,9 +5,16 @@
     "require": {
         "codeigniter4/framework": "^4"
     },
+    "require-dev": {
+        "codeigniter/coding-standard": "^1.1",
+        "friendsofphp/php-cs-fixer": "^3"
+    },
     "autoload": {
         "files": [
             "src/Rajaongkir.php"
         ]
+    },
+    "scripts": {
+        "csfix": "vendor/bin/php-cs-fixer fix"
     }
 }

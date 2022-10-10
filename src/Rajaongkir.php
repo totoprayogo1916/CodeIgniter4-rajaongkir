@@ -19,15 +19,9 @@ use Exception;
  */
 class Rajaongkir
 {
-    /**
-     * Constant Account Type
-     *
-     * @var string
-     */
     public const ACCOUNT_STARTER = 'starter';
-
-    public const ACCOUNT_BASIC = 'basic';
-    public const ACCOUNT_PRO   = 'pro';
+    public const ACCOUNT_BASIC   = 'basic';
+    public const ACCOUNT_PRO     = 'pro';
 
     /**
      * Rajaongkir::$accountType
@@ -174,7 +168,6 @@ class Rajaongkir
      */
     protected $response;
 
-
     /**
      * Rajaongkir::__construct
      *
@@ -204,7 +197,6 @@ class Rajaongkir
         }
     }
 
-
     /**
      * Rajaongkir::setApiKey
      *
@@ -221,7 +213,6 @@ class Rajaongkir
         return $this;
     }
 
-
     /**
      * Rajaongkir::setAccountType
      *
@@ -229,9 +220,9 @@ class Rajaongkir
      *
      * @param string $accountType RajaOngkir Account Type, can be starter, basic or pro
      *
-     * @throws Exception
-     *
      * @return static
+     *
+     * @throws Exception
      */
     public function setAccountType($accountType)
     {
@@ -245,7 +236,6 @@ class Rajaongkir
 
         return $this;
     }
-
 
     /**
      * Rajaongkir::request
@@ -309,7 +299,6 @@ class Rajaongkir
         return false;
     }
 
-
     /**
      * Rajaongkir::getCouriersList
      *
@@ -322,7 +311,6 @@ class Rajaongkir
         return $this->couriersList;
     }
 
-
     /**
      * Rajaongkir::getProvinces
      *
@@ -334,7 +322,6 @@ class Rajaongkir
     {
         return $this->request('province');
     }
-
 
     /**
      * Rajaongkir::getProvince
@@ -349,7 +336,6 @@ class Rajaongkir
     {
         return $this->request('province', ['id' => $idProvince]);
     }
-
 
     /**
      * Rajaongkir::getCities
@@ -371,7 +357,6 @@ class Rajaongkir
         return $this->request('city', $params);
     }
 
-
     /**
      * Rajaongkir::getCity
      *
@@ -385,7 +370,6 @@ class Rajaongkir
     {
         return $this->request('city', ['id' => $idCity]);
     }
-
 
     /**
      * Rajaongkir::getSubdistricts
@@ -412,7 +396,6 @@ class Rajaongkir
         return $this->request('subdistrict', ['city' => $idCity]);
     }
 
-
     /**
      * Rajaongkir::getSubdistrict
      *
@@ -437,7 +420,6 @@ class Rajaongkir
 
         return $this->request('subdistrict', ['id' => $idSubdistrict]);
     }
-
 
     /**
      * Rajaongkir::getInternationalOrigins
@@ -464,7 +446,6 @@ class Rajaongkir
 
         return $this->request('v2/internationalOrigin', $params);
     }
-
 
     /**
      * Rajaongkir::getInternationalOrigin
@@ -495,7 +476,6 @@ class Rajaongkir
         return $this->request('v2/internationalOrigin', $params);
     }
 
-
     /**
      * Rajaongkir::getInternationalDestinations
      *
@@ -515,7 +495,6 @@ class Rajaongkir
 
         return $this->request('v2/internationalDestination');
     }
-
 
     /**
      * Rajaongkir::getInternationalDestination
@@ -542,7 +521,6 @@ class Rajaongkir
 
         return $this->request('v2/internationalDestination', $params);
     }
-
 
     /**
      * Rajaongkir::getCost
@@ -691,7 +669,6 @@ class Rajaongkir
         return $this->request($path, $params, 'POST');
     }
 
-
     /**
      * Rajaongkir::getWaybill
      *
@@ -717,7 +694,6 @@ class Rajaongkir
         return false;
     }
 
-
     /**
      * Rajaongkir::getCurrency
      *
@@ -736,7 +712,6 @@ class Rajaongkir
         return false;
     }
 
-
     /**
      * Rajaongkir::getSupportedCouriers
      *
@@ -753,7 +728,6 @@ class Rajaongkir
         return false;
     }
 
-
     /**
      * Rajaongkir::getSupportedWayBills
      *
@@ -769,7 +743,6 @@ class Rajaongkir
 
         return false;
     }
-
 
     /**
      * Rajaongkir::getResponse
