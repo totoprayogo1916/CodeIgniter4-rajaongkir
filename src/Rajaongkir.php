@@ -171,7 +171,7 @@ class Rajaongkir
     /**
      * @var mixed[]
      */
-    public $errors;
+    public $errors = [];
 
     /**
      * Rajaongkir::__construct
@@ -291,6 +291,7 @@ class Rajaongkir
                 if ((is_countable($body['results']) ? count($body['results']) : 0) === 1 && isset($body['results'][0])) {
                     return $body['results'][0];
                 }
+
                 if ((is_countable($body['results']) ? count($body['results']) : 0) > 0) {
                     return $body['results'];
                 }
@@ -392,6 +393,7 @@ class Rajaongkir
 
             return false;
         }
+
         if ($this->accountType === 'basic') {
             $this->errors[302] = 'Unsupported Subdistricts Request. Tipe akun basic tidak mendukung hingga tingkat kecamatan.';
 
@@ -417,6 +419,7 @@ class Rajaongkir
 
             return false;
         }
+
         if ($this->accountType === 'basic') {
             $this->errors[302] = 'Unsupported Subdistricts Request. Tipe akun basic tidak mendukung hingga tingkat kecamatan.';
 
@@ -592,72 +595,70 @@ class Rajaongkir
             $params['weight'] = $metrics;
         }
 
-        switch ($this->accountType) {
-            case 'starter':
-                if ($params['destinationType'] === 'country') {
-                    $this->errors[301] = 'Unsupported International Destination. Tipe akun starter tidak mendukung pengecekan destinasi international.';
+        if ($this->accountType === 'starter') {
+            if ($params['destinationType'] === 'country') {
+                $this->errors[301] = 'Unsupported International Destination. Tipe akun starter tidak mendukung pengecekan destinasi international.';
 
-                    return false;
-                }
-                if ($params['originType'] === 'subdistrict' || $params['destinationType'] === 'subdistrict') {
-                    $this->errors[302] = 'Unsupported Subdistrict Origin-Destination. Tipe akun starter tidak mendukung pengecekan ongkos kirim sampai kecamatan.';
+                return false;
+            }
 
-                    return false;
-                }
+            if ($params['originType'] === 'subdistrict' || $params['destinationType'] === 'subdistrict') {
+                $this->errors[302] = 'Unsupported Subdistrict Origin-Destination. Tipe akun starter tidak mendukung pengecekan ongkos kirim sampai kecamatan.';
 
-                if (
-                    ! isset($params['weight'])
-                    && isset($params['length'], $params['width'], $params['height'])
-                ) {
-                    $this->errors[304] = 'Unsupported Dimension. Tipe akun starter tidak mendukung pengecekan biaya kirim berdasarkan dimensi.';
+                return false;
+            }
 
-                    return false;
-                }
-                if (isset($params['weight']) && $params['weight'] > 30000) {
-                    $this->errors[305] = 'Unsupported Weight. Tipe akun starter tidak mendukung pengecekan biaya kirim dengan berat lebih dari 30000 gram (30kg).';
+            if (
+                ! isset($params['weight'])
+                && isset($params['length'], $params['width'], $params['height'])
+            ) {
+                $this->errors[304] = 'Unsupported Dimension. Tipe akun starter tidak mendukung pengecekan biaya kirim berdasarkan dimensi.';
 
-                    return false;
-                }
+                return false;
+            }
 
-                if (! in_array($params['courier'], $this->supportedCouriers[$this->accountType], true)) {
-                    $this->errors[303] = 'Unsupported Courier. Tipe akun starter tidak mendukung pengecekan biaya kirim dengan kurir ' . $this->couriersList[$courier] . '.';
+            if (isset($params['weight']) && $params['weight'] > 30000) {
+                $this->errors[305] = 'Unsupported Weight. Tipe akun starter tidak mendukung pengecekan biaya kirim dengan berat lebih dari 30000 gram (30kg).';
 
-                    return false;
-                }
+                return false;
+            }
 
-                break;
+            if (! in_array($params['courier'], $this->supportedCouriers[$this->accountType], true)) {
+                $this->errors[303] = 'Unsupported Courier. Tipe akun starter tidak mendukung pengecekan biaya kirim dengan kurir ' . $this->couriersList[$courier] . '.';
 
-            case 'basic':
-                if ($params['originType'] === 'subdistrict' || $params['destinationType'] === 'subdistrict') {
-                    $this->errors[302] = 'Unsupported Subdistrict Origin-Destination. Tipe akun basic tidak mendukung pengecekan ongkos kirim sampai kecamatan.';
+                return false;
+            }
+        } elseif ($this->accountType === 'basic') {
+            if ($params['originType'] === 'subdistrict' || $params['destinationType'] === 'subdistrict') {
+                $this->errors[302] = 'Unsupported Subdistrict Origin-Destination. Tipe akun basic tidak mendukung pengecekan ongkos kirim sampai kecamatan.';
 
-                    return false;
-                }
+                return false;
+            }
 
-                if (
-                    ! isset($params['weight'])
-                    && isset($params['length'], $params['width'], $params['height'])
-                ) {
-                    $this->errors[304] = 'Unsupported Dimension. Tipe akun basic tidak mendukung pengecekan biaya kirim berdasarkan dimensi.';
+            if (
+                ! isset($params['weight'])
+                && isset($params['length'], $params['width'], $params['height'])
+            ) {
+                $this->errors[304] = 'Unsupported Dimension. Tipe akun basic tidak mendukung pengecekan biaya kirim berdasarkan dimensi.';
 
-                    return false;
-                }
-                if (isset($params['weight']) && $params['weight'] > 30000) {
-                    $this->errors[305] = 'Unsupported Weight. Tipe akun basic tidak mendukung pengecekan biaya kirim dengan berat lebih dari 30000 gram (30kg).';
+                return false;
+            }
 
-                    return false;
-                }
-                if (isset($params['weight']) && $params['weight'] < 30000) {
-                    unset($params['length'], $params['width'], $params['height']);
-                }
+            if (isset($params['weight']) && $params['weight'] > 30000) {
+                $this->errors[305] = 'Unsupported Weight. Tipe akun basic tidak mendukung pengecekan biaya kirim dengan berat lebih dari 30000 gram (30kg).';
 
-                if (! in_array($params['courier'], $this->supportedCouriers[$this->accountType], true)) {
-                    $this->errors[303] = 'Unsupported Courier. Tipe akun basic tidak mendukung pengecekan biaya kirim dengan kurir ' . $this->couriersList[$courier] . '.';
+                return false;
+            }
 
-                    return false;
-                }
+            if (isset($params['weight']) && $params['weight'] < 30000) {
+                unset($params['length'], $params['width'], $params['height']);
+            }
 
-                break;
+            if (! in_array($params['courier'], $this->supportedCouriers[$this->accountType], true)) {
+                $this->errors[303] = 'Unsupported Courier. Tipe akun basic tidak mendukung pengecekan biaya kirim dengan kurir ' . $this->couriersList[$courier] . '.';
+
+                return false;
+            }
         }
 
         $params['origin']      = $origin[key($origin)];

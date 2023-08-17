@@ -9,7 +9,11 @@ use Rector\Set\ValueObject\SetList;
 
 return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->paths([
-        __DIR__ . '/src',
+        __DIR__,
+    ]);
+
+    $rectorConfig->skip([
+        __DIR__ . '/vendor',
     ]);
 
     // register a single rule
@@ -19,6 +23,7 @@ return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->sets([
         SetList::DEAD_CODE,
         SetList::CODE_QUALITY,
+        SetList::CODING_STYLE,
         LevelSetList::UP_TO_PHP_74,
     ]);
 };
