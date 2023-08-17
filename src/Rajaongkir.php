@@ -568,12 +568,10 @@ class Rajaongkir
             if (
                 ! isset($metrics['weight'])
                 && isset($metrics['length'], $metrics['width'], $metrics['height'])
-
             ) {
                 $metrics['weight'] = (($metrics['length'] * $metrics['width'] * $metrics['height']) / 6000) * 1000;
             } elseif (
                 isset($metrics['weight'], $metrics['length'], $metrics['width'], $metrics['height'])
-
             ) {
                 $weight = (($metrics['length'] * $metrics['width'] * $metrics['height']) / 6000) * 1000;
 
@@ -591,7 +589,6 @@ class Rajaongkir
 
         switch ($this->accountType) {
             case 'starter':
-
                 if ($params['destinationType'] === 'country') {
                     $this->errors[301] = 'Unsupported International Destination. Tipe akun starter tidak mendukung pengecekan destinasi international.';
 
@@ -606,7 +603,6 @@ class Rajaongkir
                 if (
                     ! isset($params['weight'])
                     && isset($params['length'], $params['width'], $params['height'])
-
                 ) {
                     $this->errors[304] = 'Unsupported Dimension. Tipe akun starter tidak mendukung pengecekan biaya kirim berdasarkan dimensi.';
 
@@ -627,7 +623,6 @@ class Rajaongkir
                 break;
 
             case 'basic':
-
                 if ($params['originType'] === 'subdistrict' || $params['destinationType'] === 'subdistrict') {
                     $this->errors[302] = 'Unsupported Subdistrict Origin-Destination. Tipe akun basic tidak mendukung pengecekan ongkos kirim sampai kecamatan.';
 
@@ -637,7 +632,6 @@ class Rajaongkir
                 if (
                     ! isset($params['weight'])
                     && isset($params['length'], $params['width'], $params['height'])
-
                 ) {
                     $this->errors[304] = 'Unsupported Dimension. Tipe akun basic tidak mendukung pengecekan biaya kirim berdasarkan dimensi.';
 
