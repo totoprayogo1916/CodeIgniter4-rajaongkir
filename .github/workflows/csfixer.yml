@@ -1,4 +1,4 @@
-name: Style PHP-CS-Fixer
+name: FIX Coding
 
 on:
   push:
@@ -17,8 +17,8 @@ jobs:
       - name: Install composer packages
         run: composer install
 
-      - name: Run PHP-CS-Fixer Lint
-        run: ./vendor/bin/php-cs-fixer fix
+      - name: Run Fixer
+        run: composer run csfix
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
