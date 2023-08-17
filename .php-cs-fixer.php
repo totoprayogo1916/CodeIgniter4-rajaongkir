@@ -14,7 +14,6 @@ $overrides = [];
 
 $options = [
     'finder'       => $finder,
-    'customFixers' => FixerGenerator::create('vendor/nexusphp/cs-config/src/Fixer', 'Nexus\\CsConfig\\Fixer'),
 ];
 
 return Factory::create(new CodeIgniter4(), $overrides, $options)->forProjects();
