@@ -169,6 +169,11 @@ class Rajaongkir
     protected $response;
 
     /**
+     * @var mixed[]
+     */
+    public $errors;
+
+    /**
      * Rajaongkir::__construct
      *
      * @param mixed|null $apiKey
@@ -277,16 +282,16 @@ class Rajaongkir
             'query' => $params,
         ]);
 
-        $getBody = json_decode($this->response->getBody(), true);
+        $getBody = json_decode($this->response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         $body    = $getBody['rajaongkir'];
         $status  = $body['status'];
 
         if ($status['code'] === 200) {
             if (isset($body['results'])) {
-                if (count($body['results']) === 1 && isset($body['results'][0])) {
+                if ((is_countable($body['results']) ? count($body['results']) : 0) === 1 && isset($body['results'][0])) {
                     return $body['results'][0];
                 }
-                if (count($body['results'])) {
+                if ((is_countable($body['results']) ? count($body['results']) : 0) > 0) {
                     return $body['results'];
                 }
             } elseif (isset($body['result'])) {
@@ -715,11 +720,7 @@ class Rajaongkir
      */
     public function getSupportedCouriers()
     {
-        if (isset($this->supportedCouriers[$this->accountType])) {
-            return $this->supportedCouriers[$this->accountType];
-        }
-
-        return false;
+        return $this->supportedCouriers[$this->accountType] ?? false;
     }
 
     /**
@@ -731,11 +732,7 @@ class Rajaongkir
      */
     public function getSupportedWayBills()
     {
-        if (isset($this->supportedWayBills[$this->accountType])) {
-            return $this->supportedWayBills[$this->accountType];
-        }
-
-        return false;
+        return $this->supportedWayBills[$this->accountType] ?? false;
     }
 
     /**
