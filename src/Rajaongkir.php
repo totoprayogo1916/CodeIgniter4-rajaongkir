@@ -9,7 +9,7 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Totoprayogo;
+namespace Totoprayogo1916\CodeIgniter\Libraries;
 
 use CodeIgniter\Config\Services;
 use Exception;
