@@ -10,9 +10,9 @@
         "rector/rector": "^1.0.4"
     },
     "autoload": {
-        "files": [
-            "src/Rajaongkir.php"
-        ]
+        "psr-4": {
+            "Totoprayogo1916\\CodeIgniter\\": "src/"
+        }
     },
     "scripts": {
         "csfix": [
