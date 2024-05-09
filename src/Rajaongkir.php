@@ -169,7 +169,7 @@ class Rajaongkir
     protected $response;
 
     /**
-     * @var mixed[]
+     * @var list<mixed>
      */
     public $errors = [];
 
