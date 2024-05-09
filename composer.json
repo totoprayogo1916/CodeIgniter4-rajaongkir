@@ -11,7 +11,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Totoprayogo1916\\CodeIgniter\\": "src/"
+            "Totoprayogo1916\\CodeIgniter\\Libraries\\": "src/"
         }
     },
     "scripts": {
