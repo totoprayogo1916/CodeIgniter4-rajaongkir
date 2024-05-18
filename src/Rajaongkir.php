@@ -16,185 +16,90 @@ use Exception;
 
 /**
  * Class Rajaongkir
+ * This class provides an interface to interact with the Rajaongkir API for various shipping and logistic services.
  */
 class Rajaongkir
 {
+    // Account types
     public const ACCOUNT_STARTER = 'starter';
-    public const ACCOUNT_BASIC   = 'basic';
-    public const ACCOUNT_PRO     = 'pro';
+    public const ACCOUNT_BASIC = 'basic';
+    public const ACCOUNT_PRO = 'pro';
 
-    /**
-     * Rajaongkir::$accountType
-     *
-     * Rajaongkir Account Type.
-     *
-     * @var string
-     */
-    protected $accountType = 'starter';
+    // Account type for the current instance
+    protected $accountType = self::ACCOUNT_STARTER;
 
-    /**
-     * Rajaongkir::$apiKey
-     *
-     * Rajaongkir API key.
-     *
-     * @var string
-     */
+    // API key for authentication
     protected $apiKey;
 
-    /**
-     * List of Supported Account Types
-     *
-     * @var array
-     */
-    protected $supportedAccountTypes = [
-        'starter',
-        'basic',
-        'pro',
-    ];
-
-    /**
-     * Supported Couriers
-     *
-     * @var array
-     */
-    protected $supportedCouriers = [
-        'starter' => [
-            'jne',
-            'pos',
-            'tiki',
-        ],
-        'basic' => [
-            'esl',
-            'jne',
-            'pcp',
-            'pos',
-            'rpx',
-            'tiki',
-        ],
-        'pro' => [
-            'cahaya',
-            'dse',
-            'esl',
-            'expedito*',
-            'first',
-            'idl',
-            'indah',
-            'j&t',
-            'jet',
-            'jne',
-            'lion',
-            'ncs',
-            'ninja-express',
-            'pahala',
-            'pandu',
-            'pcp',
-            'pos',
-            'rex',
-            'rpx',
-            'sap',
-            'sicepat',
-            'slis',
-            'star',
-            'tiki',
-            'wahana',
-        ],
-    ];
-
-    /**
-     * Rajaongkir::$supportedWaybills
-     *
-     * Rajaongkir supported couriers waybills.
-     *
-     * @var array
-     */
-    protected $supportedWayBills = [
-        'starter' => [],
-        'basic'   => [
-            'jne',
-        ],
-        'pro' => [
-            'dse',
-            'first',
-            'j&t',
-            'jet',
-            'jne',
-            'pcp',
-            'pos',
-            'rpx',
-            'sap',
-            'sicepat',
-            'tiki',
-            'wahana',
-        ],
-    ];
-
-    /**
-     * Rajaongkir::$couriersList
-     *
-     * Rajaongkir courier list.
-     *
-     * @var array
-     */
-    protected $couriersList = [
-        'cahaya'    => 'Cahaya Logistik (CAHAYA)',
-        'dse'       => '21 Express (DSE)',
-        'esl'       => 'Eka Sari Lorena (ESL)',
-        'expedito*' => 'Expedito*',
-        'first'     => 'First Logistics (FIRST)',
-        'indah'     => 'Indah Logistic (INDAH)',
-        'j&t'       => 'J&T Express (J&T)',
-        'jet'       => 'JET Express (JET)',
-        'jne'       => 'Jalur Nugraha Ekakurir (JNE)',
-        'ncs'       => 'Nusantara Card Semesta (NCS)',
-        'pahala'    => 'Pahala Kencana Express (PAHALA)',
-        'pandu'     => 'Pandu Logistics (PANDU)',
-        'pcp'       => 'Priority Cargo and Package (PCP)',
-        'pos'       => 'POS Indonesia (POS)',
-        'rpx'       => 'RPX Holding (RPX)',
-        'sap'       => 'SAP Express (SAP)',
-        'sicepat'   => 'SiCepat Express (SICEPAT)',
-        'slis'      => 'Solusi Express (SLIS)',
-        'star'      => 'Star Cargo (STAR)',
-        'tiki'      => 'Citra Van Titipan Kilat (TIKI)',
-        'wahana'    => 'Wahana Prestasi Logistik (WAHANA)',
-    ];
-
-    /**
-     * Rajaongkir::$response
-     *
-     * Rajaongkir response.
-     *
-     * @var mixed
-     */
+    // Response object for handling responses
     protected $response;
 
-    /**
-     * @var list<mixed>
-     */
+    // Array to hold any errors encountered
     public $errors = [];
 
+    // Supported account types
+    protected $supportedAccountTypes = [
+        self::ACCOUNT_STARTER,
+        self::ACCOUNT_BASIC,
+        self::ACCOUNT_PRO,
+    ];
+
+    // Supported couriers for each account type
+    protected $supportedCouriers = [
+        self::ACCOUNT_STARTER => ['jne', 'pos', 'tiki'],
+        self::ACCOUNT_BASIC => ['esl', 'jne', 'pcp', 'pos', 'rpx', 'tiki'],
+        self::ACCOUNT_PRO => [
+            'cahaya', 'dse', 'esl', 'expedito*', 'first', 'idl', 'indah', 'j&t', 'jet', 'jne',
+            'lion', 'ncs', 'ninja-express', 'pahala', 'pandu', 'pcp', 'pos', 'rex', 'rpx', 'sap',
+            'sicepat', 'slis', 'star', 'tiki', 'wahana',
+        ],
+    ];
+
+    // Supported waybills for each account type
+    protected $supportedWayBills = [
+        self::ACCOUNT_STARTER => [],
+        self::ACCOUNT_BASIC => ['jne'],
+        self::ACCOUNT_PRO => [
+            'dse', 'first', 'j&t', 'jet', 'jne', 'pcp', 'pos', 'rpx', 'sap', 'sicepat', 'tiki', 'wahana',
+        ],
+    ];
+
+    // List of couriers and their descriptions
+    protected $couriersList = [
+        'cahaya' => 'Cahaya Logistik (CAHAYA)',
+        'dse' => '21 Express (DSE)',
+        'esl' => 'Eka Sari Lorena (ESL)',
+        'expedito*' => 'Expedito*',
+        'first' => 'First Logistics (FIRST)',
+        'indah' => 'Indah Logistic (INDAH)',
+        'j&t' => 'J&T Express (J&T)',
+        'jet' => 'JET Express (JET)',
+        'jne' => 'Jalur Nugraha Ekakurir (JNE)',
+        'ncs' => 'Nusantara Card Semesta (NCS)',
+        'pahala' => 'Pahala Kencana Express (PAHALA)',
+        'pandu' => 'Pandu Logistics (PANDU)',
+        'pcp' => 'Priority Cargo and Package (PCP)',
+        'pos' => 'POS Indonesia (POS)',
+        'rpx' => 'RPX Holding (RPX)',
+        'sap' => 'SAP Express (SAP)',
+        'sicepat' => 'SiCepat Express (SICEPAT)',
+        'slis' => 'Solusi Express (SLIS)',
+        'star' => 'Star Cargo (STAR)',
+        'tiki' => 'Citra Van Titipan Kilat (TIKI)',
+        'wahana' => 'Wahana Prestasi Logistik (WAHANA)',
+    ];
+
     /**
-     * Rajaongkir::__construct
+     * Rajaongkir constructor.
      *
-     * @param mixed|null $apiKey
-     * @param mixed|null $accountType
-     *
-     * @throws Exception
+     * @param array|string|null $apiKey      The API key or an array containing 'api_key' and optionally 'account_type'.
+     * @param string|null       $accountType The account type (starter, basic, pro).
      */
     public function __construct($apiKey = null, $accountType = null)
     {
         if (isset($apiKey)) {
-            if (is_array($apiKey)) {
-                if (isset($apiKey['api_key'])) {
-                    $this->apiKey = $apiKey['api_key'];
-                }
-
-                if (isset($apiKey['account_type'])) {
-                    $accountType = $apiKey['account_type'];
-                }
-            } elseif (is_string($apiKey)) {
-                $this->apiKey = $apiKey;
-            }
+            $this->apiKey = is_array($apiKey) ? ($apiKey['api_key'] ?? null) : $apiKey;
+            $accountType = is_array($apiKey) ? ($apiKey['account_type'] ?? $accountType) : $accountType;
         }
 
         if (isset($accountType)) {
@@ -203,13 +108,11 @@ class Rajaongkir
     }
 
     /**
-     * Rajaongkir::setApiKey
+     * Set the API key.
      *
-     * Set Rajaongkir API Key.
+     * @param string $apiKey The API key.
      *
-     * @param string $apiKey Rajaongkir API Key
-     *
-     * @return static
+     * @return $this
      */
     public function setApiKey($apiKey)
     {
@@ -219,15 +122,13 @@ class Rajaongkir
     }
 
     /**
-     * Rajaongkir::setAccountType
+     * Set the account type.
      *
-     * Set Rajaongkir account type.
+     * @param string $accountType The account type (starter, basic, pro).
      *
-     * @param string $accountType RajaOngkir Account Type, can be starter, basic or pro
+     * @return $this
      *
-     * @return static
-     *
-     * @throws Exception
+     * @throws Exception If the account type is invalid.
      */
     public function setAccountType($accountType)
     {
@@ -243,74 +144,56 @@ class Rajaongkir
     }
 
     /**
-     * Rajaongkir::request
+     * Make a request to the Rajaongkir API.
      *
-     * Curl request API caller.
+     * @param string $path   The API endpoint path.
+     * @param array  $params The query parameters.
+     * @param string $type   The request method (GET, POST).
      *
-     * @param string $path
-     * @param array  $params
-     * @param string $type
-     *
-     * @return array|bool Returns FALSE if failed.
+     * @return mixed The API response or false if an error occurred.
      */
     protected function request($path, $params = [], $type = 'GET')
     {
         $apiUrl = 'https://api.rajaongkir.com';
 
         switch ($this->accountType) {
-            default:
-            case 'starter':
-                $path = 'starter/' . $path;
+            case self::ACCOUNT_PRO:
+                $apiUrl = 'https://pro.rajaongkir.com';
+                $path = 'api/' . $path;
                 break;
 
-            case 'basic':
+            case self::ACCOUNT_BASIC:
                 $path = 'basic/' . $path;
                 break;
 
-            case 'pro':
-                $apiUrl = 'https://pro.rajaongkir.com';
-                $path   = 'api/' . $path;
+            case self::ACCOUNT_STARTER:
+            default:
+                $path = 'starter/' . $path;
                 break;
         }
 
         $client = Services::curlrequest();
-        $uri    = $apiUrl . '/' . $path;
+        $uri = $apiUrl . '/' . $path;
 
         $client->setHeader('key', $this->apiKey);
+        $this->response = $client->request($type, $uri, ['query' => $params]);
 
-        $this->response = $client->request($type, $uri, [
-            'query' => $params,
-        ]);
-
-        $getBody = json_decode($this->response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        $body    = $getBody['rajaongkir'];
-        $status  = $body['status'];
+        $body = json_decode($this->response->getBody(), true, 512, JSON_THROW_ON_ERROR)['rajaongkir'];
+        $status = $body['status'];
 
         if ($status['code'] === 200) {
-            if (isset($body['results'])) {
-                if ((is_countable($body['results']) ? count($body['results']) : 0) === 1 && isset($body['results'][0])) {
-                    return $body['results'][0];
-                }
-
-                if ((is_countable($body['results']) ? count($body['results']) : 0) > 0) {
-                    return $body['results'];
-                }
-            } elseif (isset($body['result'])) {
-                return $body['result'];
-            }
-        } else {
-            $this->errors[$status['code']] = $status['description'];
+            return $body['results'] ?? $body['result'] ?? false;
         }
+
+        $this->errors[$status['code']] = $status['description'];
 
         return false;
     }
 
     /**
-     * Rajaongkir::getCouriersList
+     * Get the list of couriers.
      *
-     * Get list of supported couriers.
-     *
-     * @return array|bool Returns FALSE if failed.
+     * @return array The list of couriers.
      */
     public function getCouriersList()
     {
@@ -318,11 +201,9 @@ class Rajaongkir
     }
 
     /**
-     * Rajaongkir::getProvinces
+     * Get the list of provinces.
      *
-     * Get list of provinces.
-     *
-     * @return array|bool Returns FALSE if failed.
+     * @return mixed The list of provinces or false if an error occurred.
      */
     public function getProvinces()
     {
@@ -330,13 +211,11 @@ class Rajaongkir
     }
 
     /**
-     * Rajaongkir::getProvince
+     * Get details of a specific province.
      *
-     * Get detail of single province.
+     * @param int $idProvince The province ID.
      *
-     * @param int $idProvince Province ID
-     *
-     * @return array|bool Returns FALSE if failed.
+     * @return mixed The province details or false if an error occurred.
      */
     public function getProvince($idProvince)
     {
@@ -344,33 +223,25 @@ class Rajaongkir
     }
 
     /**
-     * Rajaongkir::getCities
+     * Get the list of cities, optionally filtered by province ID.
      *
-     * Get list of province cities.
+     * @param int|null $idProvince
      *
-     * @param int $idProvince Province ID
-     *
-     * @return array|bool Returns FALSE if failed.
+     * @return mixed The list of cities or false if an error occurred.
      */
     public function getCities($idProvince = null)
     {
-        $params = [];
-
-        if (null !== $idProvince) {
-            $params['province'] = $idProvince;
-        }
+        $params = isset($idProvince) ? ['province' => $idProvince] : [];
 
         return $this->request('city', $params);
     }
 
     /**
-     * Rajaongkir::getCity
+     * Get details of a specific city.
      *
-     * Get detail of single city.
+     * @param int $idCity The city ID.
      *
-     * @param int $idCity City ID
-     *
-     * @return array|bool Returns FALSE if failed.
+     * @return mixed The city details or false if an error occurred.
      */
     public function getCity($idCity)
     {
@@ -378,375 +249,84 @@ class Rajaongkir
     }
 
     /**
-     * Rajaongkir::getSubdistricts
+     * Get the list of subdistricts, optionally filtered by city ID.
      *
-     * Get list of city subdisctricts.
+     * @param int|null $idCity The city ID.
      *
-     * @param int $idCity City ID
-     *
-     * @return array|bool Returns FALSE if failed.
+     * @return mixed The list of subdistricts or false if an error occurred.
      */
-    public function getSubdistricts($idCity)
+    public function getSubdistricts($idCity = null)
     {
-        if ($this->accountType === 'starter') {
-            $this->errors[302] = 'Unsupported Subdistricts Request. Tipe akun starter tidak mendukung hingga tingkat kecamatan.';
+        $params = isset($idCity) ? ['city' => $idCity] : [];
 
-            return false;
-        }
-
-        if ($this->accountType === 'basic') {
-            $this->errors[302] = 'Unsupported Subdistricts Request. Tipe akun basic tidak mendukung hingga tingkat kecamatan.';
-
-            return false;
-        }
-
-        return $this->request('subdistrict', ['city' => $idCity]);
+        return $this->request('subdistrict', $params);
     }
 
     /**
-     * Rajaongkir::getSubdistrict
+     * Get details of a specific subdistrict.
      *
-     * Get detail of single subdistrict.
+     * @param int $idSubdistrict The subdistrict ID.
      *
-     * @param int $idSubdistrict Subdistrict ID
-     *
-     * @return array|bool Returns FALSE if failed.
+     * @return mixed The subdistrict details or false if an error occurred.
      */
     public function getSubdistrict($idSubdistrict)
     {
-        if ($this->accountType === 'starter') {
-            $this->errors[302] = 'Unsupported Subdistricts Request. Tipe akun starter tidak mendukung hingga tingkat kecamatan.';
-
-            return false;
-        }
-
-        if ($this->accountType === 'basic') {
-            $this->errors[302] = 'Unsupported Subdistricts Request. Tipe akun basic tidak mendukung hingga tingkat kecamatan.';
-
-            return false;
-        }
-
         return $this->request('subdistrict', ['id' => $idSubdistrict]);
     }
 
     /**
-     * Rajaongkir::getInternationalOrigins
+     * Get the cost of shipping from origin to destination with specific weight and courier.
      *
-     * Get list of supported international origins.
+     * @param int       $origin          The origin city or subdistrict ID.
+     * @param int       $destination     The destination city or subdistrict ID.
+     * @param array|int $metrics         The weight or an array of weight and dimensions.
+     * @param string    $courier         The courier code.
+     * @param string    $originType      The origin type (city, subdistrict).
+     * @param string    $destinationType The destination type (city, subdistrict).
      *
-     * @param int $idProvince Province ID
-     *
-     * @return array|bool Returns FALSE if failed.
+     * @return mixed The shipping cost or false if an error occurred.
      */
-    public function getInternationalOrigins($idProvince = null)
+    public function getCost($origin, $destination, $metrics, $courier, $originType = 'city', $destinationType = 'city')
     {
-        if ($this->accountType === 'starter') {
-            $this->errors[301] = 'Unsupported International Origin Request. Tipe akun starter tidak mendukung tingkat international.';
+        $params = [
+            'origin' => $origin,
+            'destination' => $destination,
+            'courier' => $courier,
+        ];
 
-            return false;
-        }
-
-        $params = [];
-
-        if (isset($idProvince)) {
-            $params['province'] = $idProvince;
-        }
-
-        return $this->request('v2/internationalOrigin', $params);
-    }
-
-    /**
-     * Rajaongkir::getInternationalOrigin
-     *
-     * Get list of supported international origins by city and province.
-     *
-     * @param int $idCity     City ID
-     * @param int $idProvince Province ID
-     *
-     * @return array|bool Returns FALSE if failed.
-     */
-    public function getInternationalOrigin($idCity = null, $idProvince = null)
-    {
-        if ($this->accountType === 'starter') {
-            $this->errors[301] = 'Unsupported International Origin Request. Tipe akun starter tidak mendukung tingkat international.';
-
-            return false;
-        }
-
-        if (isset($idCity)) {
-            $params['id'] = $idCity;
-        }
-
-        if (isset($idProvince)) {
-            $params['province'] = $idProvince;
-        }
-
-        return $this->request('v2/internationalOrigin', $params);
-    }
-
-    /**
-     * Rajaongkir::getInternationalDestinations
-     *
-     * Get list of international destinations.
-     *
-     * @param int $id_country Country ID
-     *
-     * @return array|bool Returns FALSE if failed.
-     */
-    public function getInternationalDestinations()
-    {
-        if ($this->accountType === 'starter') {
-            $this->errors[301] = 'Unsupported International Destination Request. Tipe akun starter tidak mendukung tingkat international.';
-
-            return false;
-        }
-
-        return $this->request('v2/internationalDestination');
-    }
-
-    /**
-     * Rajaongkir::getInternationalDestination
-     *
-     * Get International Destination
-     *
-     * @param int $idCountry Country ID
-     *
-     * @return array|bool Returns FALSE if failed.
-     */
-    public function getInternationalDestination($idCountry = null)
-    {
-        if ($this->accountType === 'starter') {
-            $this->errors[301] = 'Unsupported International Destination Request. Tipe akun starter tidak mendukung tingkat international.';
-
-            return false;
-        }
-
-        $params = [];
-
-        if (isset($idCountry)) {
-            $params['id'] = $idCountry;
-        }
-
-        return $this->request('v2/internationalDestination', $params);
-    }
-
-    /**
-     * Rajaongkir::getCost
-     *
-     * Get cost calculation.
-     *
-     * @param array  $origin      City, District or Subdistrict Origin
-     * @param array  $destination City, District or Subdistrict Destination
-     * @param array  $metrics     Array of Specification
-     *                            weight      int     weight in gram (required)
-     *                            length      number  package length dimension
-     *                            width       number  package width dimension
-     *                            height      number  package height dimension
-     *                            diameter    number  package diameter
-     * @param string $courier     Courier Code
-     *
-     * @return array|bool Returns FALSE if failed.
-     *
-     * @see      http://rajaongkir.com/dokumentasi/pro
-     *
-     * @example
-     * $rajaongkir->getCost(
-     *      ['city' => 1],
-     *      ['subdistrict' => 12],
-     *      ['weight' => 100, 'length' => 100, 'width' => 100, 'height' => 100, 'diameter' => 100],
-     *      'jne'
-     * );
-     */
-    public function getCost(array $origin, array $destination, $metrics, $courier)
-    {
-        $params['courier'] = strtolower($courier);
-
-        $params['originType']      = strtolower(key($origin));
-        $params['destinationType'] = strtolower(key($destination));
-
-        if ($params['originType'] !== 'city') {
+        if ($originType === 'subdistrict') {
             $params['originType'] = 'subdistrict';
         }
 
-        if (! in_array($params['destinationType'], ['city', 'country'], true)) {
+        if ($destinationType === 'subdistrict') {
             $params['destinationType'] = 'subdistrict';
         }
 
         if (is_array($metrics)) {
-            if (
-                ! isset($metrics['weight'])
-                && isset($metrics['length'], $metrics['width'], $metrics['height'])
-            ) {
-                $metrics['weight'] = (($metrics['length'] * $metrics['width'] * $metrics['height']) / 6000) * 1000;
-            } elseif (
-                isset($metrics['weight'], $metrics['length'], $metrics['width'], $metrics['height'])
-            ) {
-                $weight = (($metrics['length'] * $metrics['width'] * $metrics['height']) / 6000) * 1000;
-
-                if ($weight > $metrics['weight']) {
-                    $metrics['weight'] = $weight;
-                }
-            }
-
-            foreach ($metrics as $key => $value) {
-                $params[$key] = $value;
-            }
-        } elseif (is_numeric($metrics)) {
+            $params = array_merge($params, $metrics);
+        } else {
             $params['weight'] = $metrics;
         }
 
-        if ($this->accountType === 'starter') {
-            if ($params['destinationType'] === 'country') {
-                $this->errors[301] = 'Unsupported International Destination. Tipe akun starter tidak mendukung pengecekan destinasi international.';
+        return $this->request('cost', $params, 'POST');
+    }
 
-                return false;
-            }
+    /**
+     * Get the waybill tracking information for a specific courier.
+     *
+     * @param string $waybill The waybill number.
+     * @param string $courier The courier code.
+     *
+     * @return mixed The waybill tracking information or false if an error occurred.
+     */
+    public function getWayBill($waybill, $courier)
+    {
+        if ($this->accountType === self::ACCOUNT_STARTER) {
+            $this->errors[301] = 'Unsupported Way Bill Request.';
 
-            if ($params['originType'] === 'subdistrict' || $params['destinationType'] === 'subdistrict') {
-                $this->errors[302] = 'Unsupported Subdistrict Origin-Destination. Tipe akun starter tidak mendukung pengecekan ongkos kirim sampai kecamatan.';
-
-                return false;
-            }
-
-            if (
-                ! isset($params['weight'])
-                && isset($params['length'], $params['width'], $params['height'])
-            ) {
-                $this->errors[304] = 'Unsupported Dimension. Tipe akun starter tidak mendukung pengecekan biaya kirim berdasarkan dimensi.';
-
-                return false;
-            }
-
-            if (isset($params['weight']) && $params['weight'] > 30000) {
-                $this->errors[305] = 'Unsupported Weight. Tipe akun starter tidak mendukung pengecekan biaya kirim dengan berat lebih dari 30000 gram (30kg).';
-
-                return false;
-            }
-
-            if (! in_array($params['courier'], $this->supportedCouriers[$this->accountType], true)) {
-                $this->errors[303] = 'Unsupported Courier. Tipe akun starter tidak mendukung pengecekan biaya kirim dengan kurir ' . $this->couriersList[$courier] . '.';
-
-                return false;
-            }
-        } elseif ($this->accountType === 'basic') {
-            if ($params['originType'] === 'subdistrict' || $params['destinationType'] === 'subdistrict') {
-                $this->errors[302] = 'Unsupported Subdistrict Origin-Destination. Tipe akun basic tidak mendukung pengecekan ongkos kirim sampai kecamatan.';
-
-                return false;
-            }
-
-            if (
-                ! isset($params['weight'])
-                && isset($params['length'], $params['width'], $params['height'])
-            ) {
-                $this->errors[304] = 'Unsupported Dimension. Tipe akun basic tidak mendukung pengecekan biaya kirim berdasarkan dimensi.';
-
-                return false;
-            }
-
-            if (isset($params['weight']) && $params['weight'] > 30000) {
-                $this->errors[305] = 'Unsupported Weight. Tipe akun basic tidak mendukung pengecekan biaya kirim dengan berat lebih dari 30000 gram (30kg).';
-
-                return false;
-            }
-
-            if (isset($params['weight']) && $params['weight'] < 30000) {
-                unset($params['length'], $params['width'], $params['height']);
-            }
-
-            if (! in_array($params['courier'], $this->supportedCouriers[$this->accountType], true)) {
-                $this->errors[303] = 'Unsupported Courier. Tipe akun basic tidak mendukung pengecekan biaya kirim dengan kurir ' . $this->couriersList[$courier] . '.';
-
-                return false;
-            }
+            return false;
         }
 
-        $params['origin']      = $origin[key($origin)];
-        $params['destination'] = $destination[key($destination)];
-
-        $path = key($destination) === 'country' ? 'internationalCost' : 'cost';
-
-        return $this->request($path, $params, 'POST');
-    }
-
-    /**
-     * Rajaongkir::getWaybill
-     *
-     * Get detail of waybill.
-     *
-     * @param int         $idWaybill Receipt ID
-     * @param string|null $courier   Courier Code
-     *
-     * @return array|bool Returns FALSE if failed.
-     */
-    public function getWaybill($idWaybill, $courier)
-    {
-        $courier = strtolower($courier);
-
-        if (in_array($courier, $this->supportedWayBills[$this->accountType], true)) {
-            return $this->request('waybill', [
-                'key'     => $this->apiKey,
-                'waybill' => $idWaybill,
-                'courier' => $courier,
-            ], 'POST');
-        }
-
-        return false;
-    }
-
-    /**
-     * Rajaongkir::getCurrency
-     *
-     * Get Rajaongkir currency.
-     *
-     * @return array|bool Returns FALSE if failed.
-     */
-    public function getCurrency()
-    {
-        if ($this->accountType !== 'starter') {
-            return $this->request('currency');
-        }
-
-        $this->errors[301] = 'Unsupported Get Currency. Tipe akun starter tidak mendukung pengecekan currency.';
-
-        return false;
-    }
-
-    /**
-     * Rajaongkir::getSupportedCouriers
-     *
-     * Gets list of supported couriers by your account.
-     *
-     * @return array|bool Returns FALSE if failed.
-     */
-    public function getSupportedCouriers()
-    {
-        return $this->supportedCouriers[$this->accountType] ?? false;
-    }
-
-    /**
-     * Rajaongkir::getSupportedWayBills
-     *
-     * Gets list of supported way bills based on account type.
-     *
-     * @return array|bool Returns FALSE if failed.
-     */
-    public function getSupportedWayBills()
-    {
-        return $this->supportedWayBills[$this->accountType] ?? false;
-    }
-
-    /**
-     * Rajaongkir::getResponse
-     *
-     * Get original response object.
-     *
-     * @param string $offset Response Offset Object
-     *
-     * @return bool|\O2System\Curl\Response Returns FALSE if failed.
-     */
-    public function getResponse()
-    {
-        return $this->response;
+        return $this->request('waybill', ['waybill' => $waybill, 'courier' => $courier], 'POST');
     }
 }
