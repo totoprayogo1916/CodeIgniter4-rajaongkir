@@ -329,4 +329,20 @@ class Rajaongkir
 
         return $this->request('waybill', ['waybill' => $waybill, 'courier' => $courier], 'POST');
     }
+
+     /**
+     * Get the currency for the current account type.
+     *
+     * @return mixed The currency information or false if an error occurred.
+     */
+    public function getCurrency()
+    {
+        if ($this->accountType !== self::ACCOUNT_STARTER) {
+            return $this->request('currency');
+        }
+
+        $this->errors[301] = 'Unsupported Get Currency. Tipe akun starter tidak mendukung pengecekan currency.';
+
+        return false;
+    }
 }
