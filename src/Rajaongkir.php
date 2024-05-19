@@ -330,7 +330,7 @@ class Rajaongkir
         return $this->request('waybill', ['waybill' => $waybill, 'courier' => $courier], 'POST');
     }
 
-     /**
+    /**
      * Get the currency for the current account type.
      *
      * @return mixed The currency information or false if an error occurred.
