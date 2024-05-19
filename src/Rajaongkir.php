@@ -175,8 +175,14 @@ class Rajaongkir
         $client = Services::curlrequest();
         $uri    = $apiUrl . '/' . $path;
 
+        if ($type === 'POST') {
+            $options['form_params'] = $params;
+        } else {
+            $options['query'] = $params;
+        }
+
         $client->setHeader('key', $this->apiKey);
-        $this->response = $client->request($type, $uri, ['query' => $params]);
+        $this->response = $client->request($type, $uri, $options);
 
         $body   = json_decode($this->response->getBody(), true, 512, JSON_THROW_ON_ERROR)['rajaongkir'];
         $status = $body['status'];
@@ -217,7 +223,7 @@ class Rajaongkir
      *
      * @return mixed The province details or false if an error occurred.
      */
-    public function getProvince($idProvince)
+    public function getProvince(int $idProvince)
     {
         return $this->request('province', ['id' => $idProvince]);
     }
@@ -229,7 +235,7 @@ class Rajaongkir
      *
      * @return mixed The list of cities or false if an error occurred.
      */
-    public function getCities($idProvince = null)
+    public function getCities(?int $idProvince = null)
     {
         $params = isset($idProvince) ? ['province' => $idProvince] : [];
 
@@ -243,73 +249,134 @@ class Rajaongkir
      *
      * @return mixed The city details or false if an error occurred.
      */
-    public function getCity($idCity)
+    public function getCity(int $idCity)
     {
         return $this->request('city', ['id' => $idCity]);
     }
 
     /**
-     * Get the list of subdistricts, optionally filtered by city ID.
+     * Retrieves information about subdistricts.
      *
-     * @param int|null $idCity The city ID.
+     * This function fetches data about subdistricts based on the provided city ID
+     * and optionally a specific subdistrict ID.
      *
-     * @return mixed The list of subdistricts or false if an error occurred.
+     * @param int $idCity The ID of the city to retrieve subdistricts for.
+     * @param int|null $idSubdistrict (optional) The ID of a specific subdistrict within the city.
+     *        If null, all subdistricts for the city will be retrieved.
+     *
+     * @return mixed
      */
-    public function getSubdistricts($idCity = null)
+    public function getSubdistricts(int $idCity, ?int $idSubdistrict = null)
     {
-        $params = isset($idCity) ? ['city' => $idCity] : [];
+    $params = ['city' => $idCity];
 
-        return $this->request('subdistrict', $params);
+    if ($idSubdistrict !== null) {
+        $params['id'] = $idSubdistrict;
+    }
+
+    return $this->request('subdistrict', $params);
     }
 
     /**
-     * Get details of a specific subdistrict.
-     *
-     * @param int $idSubdistrict The subdistrict ID.
-     *
-     * @return mixed The subdistrict details or false if an error occurred.
-     */
-    public function getSubdistrict($idSubdistrict)
-    {
-        return $this->request('subdistrict', ['id' => $idSubdistrict]);
+ * Get the cost of shipping from origin to destination with specific weight and courier.
+ *
+ * @param array $origin The origin city or subdistrict ID, with the key indicating the type ('city' or 'subdistrict').
+ * @param array $destination The destination city, subdistrict, or country ID, with the key indicating the type ('city', 'subdistrict', or 'country').
+ * @param mixed $metrics The weight as an integer or an array containing weight and optionally dimensions.
+ * @param string $courier The courier code.
+ * @return mixed The shipping cost or false if an error occurred.
+ */
+public function getCost(array $origin, array $destination, $metrics, $courier)
+{
+    $params = [
+        'courier' => strtolower($courier),
+        'originType' => strtolower(key($origin)),
+        'destinationType' => strtolower(key($destination))
+    ];
+
+    // Adjust origin and destination types if needed
+    if ($params['originType'] !== 'city') {
+        $params['originType'] = 'subdistrict';
     }
 
-    /**
-     * Get the cost of shipping from origin to destination with specific weight and courier.
-     *
-     * @param int       $origin          The origin city or subdistrict ID.
-     * @param int       $destination     The destination city or subdistrict ID.
-     * @param array|int $metrics         The weight or an array of weight and dimensions.
-     * @param string    $courier         The courier code.
-     * @param string    $originType      The origin type (city, subdistrict).
-     * @param string    $destinationType The destination type (city, subdistrict).
-     *
-     * @return mixed The shipping cost or false if an error occurred.
-     */
-    public function getCost($origin, $destination, $metrics, $courier, $originType = 'city', $destinationType = 'city')
-    {
-        $params = [
-            'origin'      => $origin,
-            'destination' => $destination,
-            'courier'     => $courier,
-        ];
-
-        if ($originType === 'subdistrict') {
-            $params['originType'] = 'subdistrict';
-        }
-
-        if ($destinationType === 'subdistrict') {
-            $params['destinationType'] = 'subdistrict';
-        }
-
-        if (is_array($metrics)) {
-            $params = array_merge($params, $metrics);
-        } else {
-            $params['weight'] = $metrics;
-        }
-
-        return $this->request('cost', $params, 'POST');
+    if (!in_array($params['destinationType'], ['city', 'country'], true)) {
+        $params['destinationType'] = 'subdistrict';
     }
+
+    // Handle metrics
+    if (is_array($metrics)) {
+        if (!isset($metrics['weight']) && isset($metrics['length'], $metrics['width'], $metrics['height'])) {
+            // Calculate volumetric weight if only dimensions are provided
+            $metrics['weight'] = (($metrics['length'] * $metrics['width'] * $metrics['height']) / 6000) * 1000;
+        } elseif (isset($metrics['weight'], $metrics['length'], $metrics['width'], $metrics['height'])) {
+            // Choose the higher value between actual weight and volumetric weight
+            $weight = (($metrics['length'] * $metrics['width'] * $metrics['height']) / 6000) * 1000;
+            if ($weight > $metrics['weight']) {
+                $metrics['weight'] = $weight;
+            }
+        }
+        foreach ($metrics as $key => $value) {
+            $params[$key] = $value;
+        }
+    } elseif (is_numeric($metrics)) {
+        $params['weight'] = $metrics;
+    }
+
+    // Account type specific checks and adjustments
+    if ($this->accountType === self::ACCOUNT_STARTER) {
+        if ($params['destinationType'] === 'country') {
+            $this->errors[301] = 'Unsupported International Destination. Tipe akun starter tidak mendukung pengecekan destinasi internasional.';
+            return false;
+        }
+        if ($params['originType'] === 'subdistrict' || $params['destinationType'] === 'subdistrict') {
+            $this->errors[302] = 'Unsupported Subdistrict Origin-Destination. Tipe akun starter tidak mendukung pengecekan ongkos kirim sampai kecamatan.';
+            return false;
+        }
+        if (!isset($params['weight']) && isset($params['length'], $params['width'], $params['height'])) {
+            $this->errors[304] = 'Unsupported Dimension. Tipe akun starter tidak mendukung pengecekan biaya kirim berdasarkan dimensi.';
+            return false;
+        }
+        if (isset($params['weight']) && $params['weight'] > 30000) {
+            $this->errors[305] = 'Unsupported Weight. Tipe akun starter tidak mendukung pengecekan biaya kirim dengan berat lebih dari 30000 gram (30kg).';
+            return false;
+        }
+        if (!in_array($params['courier'], $this->supportedCouriers[$this->accountType], true)) {
+            $this->errors[303] = 'Unsupported Courier. Tipe akun starter tidak mendukung pengecekan biaya kirim dengan kurir ' . $this->couriersList[$courier] . '.';
+            return false;
+        }
+    } elseif ($this->accountType === self::ACCOUNT_BASIC) {
+        if ($params['originType'] === 'subdistrict' || $params['destinationType'] === 'subdistrict') {
+            $this->errors[302] = 'Unsupported Subdistrict Origin-Destination. Tipe akun basic tidak mendukung pengecekan ongkos kirim sampai kecamatan.';
+            return false;
+        }
+        if (!isset($params['weight']) && isset($params['length'], $params['width'], $params['height'])) {
+            $this->errors[304] = 'Unsupported Dimension. Tipe akun basic tidak mendukung pengecekan biaya kirim berdasarkan dimensi.';
+            return false;
+        }
+        if (isset($params['weight']) && $params['weight'] > 30000) {
+            $this->errors[305] = 'Unsupported Weight. Tipe akun basic tidak mendukung pengecekan biaya kirim dengan berat lebih dari 30000 gram (30kg).';
+            return false;
+        }
+        if (isset($params['weight']) && $params['weight'] < 30000) {
+            unset($params['length'], $params['width'], $params['height']);
+        }
+        if (!in_array($params['courier'], $this->supportedCouriers[$this->accountType], true)) {
+            $this->errors[303] = 'Unsupported Courier. Tipe akun basic tidak mendukung pengecekan biaya kirim dengan kurir ' . $this->couriersList[$courier] . '.';
+            return false;
+        }
+    }
+
+    // Set origin and destination values
+    $params['origin']      = $origin[key($origin)];
+    $params['destination'] = $destination[key($destination)];
+
+    // Determine the path based on destination type
+    $path = key($destination) === 'country' ? 'internationalCost' : 'cost';
+
+    // Make the request
+    return $this->request($path, $params, 'POST');
+}
+
 
     /**
      * Get the waybill tracking information for a specific courier.
